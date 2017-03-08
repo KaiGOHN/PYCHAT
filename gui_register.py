@@ -1,6 +1,7 @@
 from tkinter import *
 from client_functions import *
 from tkinter.messagebox import *
+from re import *
 
 def gui_register():
     def resgisterbutton():
@@ -9,16 +10,23 @@ def gui_register():
         first_name = str(entree_first_name.get())
         last_name = str(entree_last_name.get())
         email = str(entree_email.get())
-        log = register(username, password, first_name, last_name, email)
-        if log == True:
-            registerwindow.destroy()
-        elif log == "err1":
-            showwarning('ERR1', 'SERVEUR INACESSIBLE')
-        elif log == "err3":
-            showwarning('ERR3', 'BASE DE DONNÉE INACESSIBLE')
-        elif log == "err4":
-            showwarning('ERR4', "NOM D'UTILISATEUR OU EMAIL NON DISPONIBLE")
-
+        if len(password) <= 16 and len(password) >= 8:
+            password_test = True
+        else:
+            password_test = False
+        email_regex = re.match(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)", email)
+        if email_regex is not None and password_test == True:
+            log = register(username, password, first_name, last_name, email)
+            if log == True:
+                registerwindow.destroy()
+            elif log == "err1":
+                showwarning('ERR1', 'SERVEUR INACESSIBLE')
+            elif log == "err3":
+                showwarning('ERR3', 'BASE DE DONNÉE INACESSIBLE')
+            elif log == "err4":
+                showwarning('ERR4', "NOM D'UTILISATEUR OU EMAIL NON DISPONIBLE")
+        else:
+            showwarning('ERREUR', 'EMAIL OU MOT DE PASSE INVALIDE')
     registerwindow = Tk()
     registerwindow.title("Inscription")
 

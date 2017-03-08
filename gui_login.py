@@ -1,7 +1,6 @@
-from tkinter import *
-from client_functions import *
-from tkinter.messagebox import *
+from gui_chat import *
 from gui_register import *
+
 
 def callback(event):
     gui_register()
@@ -13,6 +12,7 @@ def gui_login():
         log = login(username, password)
         if log == True:
             fenetre.destroy()
+            gui_chat()
         elif log == "err1":
             showwarning('ERR1', 'SERVEUR INACESSIBLE')
         elif log == "err3":
