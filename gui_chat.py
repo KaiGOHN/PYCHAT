@@ -1,2 +1,2 @@
 def gui_chat():
-    print("test")
+    print("t")
