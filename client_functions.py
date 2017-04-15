@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import socket
 import configparser
 import os.path
+import pickle
+import socket
+
 
 def readcfg(list):
     config = configparser.ConfigParser()
@@ -11,7 +13,8 @@ def readcfg(list):
         config = config[item]
     return str(config)
 
-def connect(host, port):
+
+def connect(host: object, port: object) -> object:
     try :
         connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         connexion_avec_serveur.connect((host, int(port)))
@@ -21,12 +24,12 @@ def connect(host, port):
 
 
 def send(msg_a_envoyer,connexion_avec_serveur ):
-    msg_a_envoyer = msg_a_envoyer.encode('utf-8')
+    msg_a_envoyer = pickle.dumps(msg_a_envoyer)
     connexion_avec_serveur.send(msg_a_envoyer)
 
 def recv(connexion_avec_serveur):
     msg_recu = connexion_avec_serveur.recv(1024)
-    stringdata = msg_recu.decode('utf-8')
+    stringdata = pickle.loads(msg_recu)
     return stringdata
 
 def disconnect(connexion_avec_serveur):
@@ -37,7 +40,7 @@ def login(username, password):
     if connexion_avec_serveur == "err1":
         return "err1"
     else:
-        msg_a_envoyer = '"' + 'login' + '"' + '-' + '"' + username + '"' + '-' + '"' + password + '"'
+        msg_a_envoyer = ["login", username, password]
         send(msg_a_envoyer,connexion_avec_serveur)
         stringdata = recv(connexion_avec_serveur)
         disconnect(connexion_avec_serveur)
@@ -45,12 +48,40 @@ def login(username, password):
             return True
         else:
             return stringdata
+
+
+def sendmsg(username, msg):
+    connexion_avec_serveur = connect(readcfg(['SOCKET', 'host']), readcfg(['SOCKET', 'port']))
+    if connexion_avec_serveur == "err1":
+        return "err1"
+    else:
+        msg_a_envoyer = ["sendmsg", username, msg]
+        send(msg_a_envoyer, connexion_avec_serveur)
+
+
+def loadlastid():
+    connexion_avec_serveur = connect(readcfg(['SOCKET', 'host']), readcfg(['SOCKET', 'port']))
+    msg_a_envoyer = ["loadlastid"]
+    send(msg_a_envoyer, connexion_avec_serveur)
+    data = recv(connexion_avec_serveur)
+    disconnect(connexion_avec_serveur)
+    return data
+
+
+def get_msg(id):
+    connexion_avec_serveur = connect(readcfg(['SOCKET', 'host']), readcfg(['SOCKET', 'port']))
+    msg_a_envoyer = ["get_msg", id]
+    send(msg_a_envoyer, connexion_avec_serveur)
+    data = recv(connexion_avec_serveur)
+    disconnect(connexion_avec_serveur)
+    return data
+
 def register(username, password, first_name, last_name, email):
     connexion_avec_serveur = connect(readcfg(['SOCKET','host']), readcfg(['SOCKET','port']))
     if connexion_avec_serveur == "err1":
         return "err1"
     else:
-        msg_a_envoyer = '"' + 'register' + '"' + '-' + '"' + username + '"' + '-' + '"' + password + '"' + '-' + '"' + first_name + '"' + '-' + '"' + last_name + '"' + '-' + '"' + email + '"'
+        msg_a_envoyer = ["register", username, password, first_name, last_name, email]
         send(msg_a_envoyer,connexion_avec_serveur)
         stringdata = recv(connexion_avec_serveur)
         disconnect(connexion_avec_serveur)

@@ -1,9 +1,10 @@
 import configparser
 import os.path
+import pickle
 
 def login(userinput, self):
     login = str(userinput[1])
-    password = (str(userinput[2]))[:-1]
+    password = str(userinput[2])
     is_login_valid = check_login(login)
     if is_login_valid == True:
         is_password_valid = check_password(login, password)
@@ -24,14 +25,95 @@ def login(userinput, self):
                 cursor.close()
                 cnx.close()
                 msg = "logs ok"
-                self.clientsocket.send(msg.encode('utf-8'))
+                self.clientsocket.send(pickle.dumps(msg))
             except:
                 msg = "err3"
-                self.clientsocket.send(msg.encode('utf-8'))
+                self.clientsocket.send(pickle.dumps(msg))
         else:
-            self.clientsocket.send(b"invalid username or password")
+            self.clientsocket.send(pickle.dumps("invalid username or password"))
     else:
-        self.clientsocket.send(b"invalid username or password")
+        self.clientsocket.send(pickle.dumps("invalid username or password"))
+
+
+def sendmsg(userinput, self):
+    import time
+    username = str(userinput[1])
+    msg = str(userinput[2])
+    time = time.strftime('%Y-%m-%d %H:%M:%S')
+    try:
+        import mysql.connector
+        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                      port=int(readcfg(['DATABASE', 'port'])),
+                                      user=readcfg(['DATABASE', 'user']),
+                                      password=readcfg(['DATABASE', 'password']),
+                                      database=readcfg(['DATABASE', 'database']))
+        cursor = cnx.cursor()
+        query = "INSERT INTO chat (username, msg, time) VALUES(" + "'" + username + "'" + ", " + "'" + msg + "'" + ", " + "'" + time + "'" + ")"
+        cursor.execute(query)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+    except:
+        msg = "err3"
+        self.clientsocket.send(pickle.dumps(msg))
+
+
+def loadlastid(self):
+    try:
+        import mysql.connector
+        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                      port=int(readcfg(['DATABASE', 'port'])),
+                                      user=readcfg(['DATABASE', 'user']),
+                                      password=readcfg(['DATABASE', 'password']),
+                                      database=readcfg(['DATABASE', 'database']))
+        cursor = cnx.cursor()
+        query = "SELECT id FROM chat ORDER BY id DESC LIMIT 1"
+        cursor.execute(query)
+        data = cursor.fetchall()
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+        if data != "":
+            id = int(str(data)[2:-3])
+            self.clientsocket.send(pickle.dumps(id))
+        else:
+            self.clientsocket.send(pickle.dumps("nomessages"))
+    except:
+        self.clientsocket.send(pickle.dumps("err3"))
+
+
+def get_msg(userinput, self):
+    id = str(userinput[1])
+    try:
+        import mysql.connector
+        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                      port=int(readcfg(['DATABASE', 'port'])),
+                                      user=readcfg(['DATABASE', 'user']),
+                                      password=readcfg(['DATABASE', 'password']),
+                                      database=readcfg(['DATABASE', 'database']))
+        cursor = cnx.cursor()
+        query = "SELECT username FROM chat WHERE id ='" + id + "'"
+        cursor.execute(query)
+        username = cursor.fetchall()
+        username = str(username[0])
+        username = username[2:-3]
+        query = "SELECT msg FROM chat WHERE id ='" + id + "'"
+        cursor.execute(query)
+        msg = cursor.fetchall()
+        msg = str(msg[0])
+        msg = msg[2:-3]
+        query = "SELECT time FROM chat WHERE id ='" + id + "'"
+        cursor.execute(query)
+        time = cursor.fetchall()
+        time = str(time[0])
+        time = time[19:-3]
+        time = time.split(", ")
+        time = str(time[3] + ":" + time[4] + ":" + time[5])
+        returnlist = [id, username, msg, time]
+
+        self.clientsocket.send(pickle.dumps(returnlist))
+    except:
+        self.clientsocket.send(pickle.dumps("err3"))
 
 def register(userinput, self):
     username = str(userinput[1])
@@ -56,13 +138,13 @@ def register(userinput, self):
             cursor.close()
             cnx.close()
             msg = "reg ok"
-            self.clientsocket.send(msg.encode('utf-8'))
+            self.clientsocket.send(pickle.dumps(msg))
         except:
             msg = "err3"
-            self.clientsocket.send(msg.encode('utf-8'))
+            self.clientsocket.send(pickle.dumps(msg))
     else:
         msg = "err4"
-        self.clientsocket.send(msg.encode('utf-8'))
+        self.clientsocket.send(pickle.dumps(msg))
 
 def check_login(login):
     import mysql.connector
@@ -75,9 +157,7 @@ def check_login(login):
     query = "SELECT username FROM users WHERE username ='" + login + "'"
     cursor.execute(query)
     data = cursor.fetchall()
-    data = str(data)
-    data = data[14:-5]
-    if data != "":
+    if data != []:
         cursor.close()
         cnx.close()
         return True
@@ -95,9 +175,7 @@ def check_email(email):
     query = "SELECT username FROM users WHERE email ='" + email + "'"
     cursor.execute(query)
     data = cursor.fetchall()
-    data = str(data)
-    data = data[14:-5]
-    if data != "":
+    if data != []:
         cursor.close()
         cnx.close()
         return True
@@ -117,7 +195,7 @@ def check_password(login,password):
     cursor.execute(query)
     data = cursor.fetchall()
     data = str(data)
-    data = data[14:-5]
+    data = data[3:-4]
     if data == password:
         cursor.close()
         cnx.close()

@@ -12,7 +12,7 @@ def gui_login():
         log = login(username, password)
         if log == True:
             fenetre.destroy()
-            gui_chat()
+            gui_chat(username)
         elif log == "err1":
             showwarning('ERR1', 'SERVEUR INACESSIBLE')
         elif log == "err3":
