@@ -14,7 +14,7 @@ def readcfg(list):
     return str(config)
 
 
-def connect(host: object, port: object) -> object:
+def connect(host, port):
     try :
         connexion_avec_serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         connexion_avec_serveur.connect((host, int(port)))
@@ -33,6 +33,7 @@ def recv(connexion_avec_serveur):
     return stringdata
 
 def disconnect(connexion_avec_serveur):
+    connexion_avec_serveur.shutdown(1)
     connexion_avec_serveur.close()
 
 def login(username, password):
@@ -59,9 +60,9 @@ def sendmsg(username, msg):
         send(msg_a_envoyer, connexion_avec_serveur)
 
 
-def loadlastid():
+def loadidslist(username):
     connexion_avec_serveur = connect(readcfg(['SOCKET', 'host']), readcfg(['SOCKET', 'port']))
-    msg_a_envoyer = ["loadlastid"]
+    msg_a_envoyer = ["loadidslist", username]
     send(msg_a_envoyer, connexion_avec_serveur)
     data = recv(connexion_avec_serveur)
     disconnect(connexion_avec_serveur)
@@ -99,6 +100,10 @@ def check_cfg():
                             'port': '1111'}
         with open('client_config.ini', 'w') as configfile:
             config.write(configfile)
+        config['HTTP'] = {'host': 'localhost',
+                          'port': '8000'}
+        with open('client_config.ini', 'w') as configfile:
+            config.write(configfile)
     else:
         config = configparser.ConfigParser()
         config.read('client_config.ini')
@@ -116,4 +121,16 @@ def check_cfg():
             config['SOCKET']['port'] = '1111'
             with open('client_config.ini', 'w') as configfile:
                 config.write(configfile)
-
+        if ('HTTP' in config) is False:
+            config['HTTP'] = {'host': 'localhost',
+                              'port': '8000'}
+            with open('client_config.ini', 'w') as configfile:
+                config.write(configfile)
+        if ('host' in config['HTTP']) is False:
+            config['SOCKET']['host'] = 'localhost'
+            with open('client_config.ini', 'w') as configfile:
+                config.write(configfile)
+        if ('port' in config['HTTP']) is False:
+            config['SOCKET']['port'] = '8000'
+            with open('client_config.ini', 'w') as configfile:
+                config.write(configfile)

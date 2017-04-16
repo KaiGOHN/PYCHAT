@@ -11,14 +11,12 @@ def close():
 
 
 def gui_chat(a):
-    global id
-    id = loadlastid()
+    global username
+    username = a
     global launch
     launch = 1
     global Running
     Running = True
-    global username
-    username = a
     global guichat
     guichat = Tk()
     guichat.title("Chat")
@@ -56,19 +54,24 @@ class RefreshMessages(Thread):
         Thread.__init__(self)
 
     def run(self):
+        localidlist = []
         while Running == True:
             try:
-                time.sleep(0.5)
-                global id
+                time.sleep(1)
                 global guichat
-                lastid = loadlastid()
-                if lastid > id:
-                    data = get_msg(lastid)
-                    id = int(data[0])
-                    text = "[" + str(data[3]) + "] " + "<" + str(data[1]) + "> " + str(data[2]) + "\n"
-                    chat.config(state=NORMAL)
-                    chat.insert(END, text)
-                    chat.config(state=DISABLED)
-
+                # request = requests.get("http://"+ readcfg(['HTTP', 'host'])+ ":" + readcfg(['HTTP', 'port']) + "/idlist.txt")
+                # request = request.text
+                # idlist = request.split("\r\n")
+                # idlist = idlist[:-1]
+                idlist = loadidslist(username)
+                for item in idlist:
+                    item = str(item)[1:-2]
+                    if (item not in localidlist) is True:
+                        data = get_msg(item)
+                        localidlist.append(item)
+                        text = "[" + str(data[3]) + "] " + "<" + str(data[1]) + "> " + str(data[2]) + "\n"
+                        chat.config(state=NORMAL)
+                        chat.insert(END, text)
+                        chat.config(state=DISABLED)
             except:
                 pass
