@@ -1,7 +1,6 @@
 import configparser
 import os.path
 import pickle
-from threading import Thread
 
 def login(userinput, self):
     login = str(userinput[1])
@@ -12,11 +11,11 @@ def login(userinput, self):
         if is_password_valid == True:
             try :
                 import mysql.connector
-                cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                              port=int(readcfg(['DATABASE', 'port'], 1)),
-                                              user=readcfg(['DATABASE', 'user'], 1),
-                                              password=readcfg(['DATABASE', 'password'], 1),
-                                              database=readcfg(['DATABASE', 'database'], 1))
+                cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                              port=int(readcfg(['DATABASE', 'port'])),
+                                              user=readcfg(['DATABASE', 'user']),
+                                              password=readcfg(['DATABASE', 'password']),
+                                              database=readcfg(['DATABASE', 'database']))
                 cursor = cnx.cursor()
                 log_user = ("UPDATE users "
                             "SET status = '1'"
@@ -43,11 +42,11 @@ def sendmsg(userinput, self):
     time = time.strftime('%Y-%m-%d %H:%M:%S')
     try:
         import mysql.connector
-        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                      port=int(readcfg(['DATABASE', 'port'], 1)),
-                                      user=readcfg(['DATABASE', 'user'], 1),
-                                      password=readcfg(['DATABASE', 'password'], 1),
-                                      database=readcfg(['DATABASE', 'database'], 1))
+        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                      port=int(readcfg(['DATABASE', 'port'])),
+                                      user=readcfg(['DATABASE', 'user']),
+                                      password=readcfg(['DATABASE', 'password']),
+                                      database=readcfg(['DATABASE', 'database']))
         cursor = cnx.cursor()
         query = "INSERT INTO chat (username, msg, time) VALUES(" + "'" + username + "'" + ", " + "'" + msg + "'" + ", " + "'" + time + "'" + ")"
         cursor.execute(query)
@@ -66,11 +65,11 @@ def loadidslist(username, self):
     try:
         import mysql.connector
         import time
-        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                      port=int(readcfg(['DATABASE', 'port'], 1)),
-                                      user=readcfg(['DATABASE', 'user'], 1),
-                                      password=readcfg(['DATABASE', 'password'], 1),
-                                      database=readcfg(['DATABASE', 'database'], 1))
+        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                      port=int(readcfg(['DATABASE', 'port'])),
+                                      user=readcfg(['DATABASE', 'user']),
+                                      password=readcfg(['DATABASE', 'password']),
+                                      database=readcfg(['DATABASE', 'database']))
         cursor = cnx.cursor()
         query = "SELECT id FROM chat ORDER BY id ASC"
         cursor.execute(query)
@@ -84,53 +83,15 @@ def loadidslist(username, self):
     except:
         self.clientsocket.send(pickle.dumps("err3"))
 
-
-class RefreshIdsList(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-
-    def run(self):
-        import time
-        while True:
-            time.sleep(1)
-            try:
-                import mysql.connector
-                cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                              port=int(readcfg(['DATABASE', 'port'], 1)),
-                                              user=readcfg(['DATABASE', 'user'], 1),
-                                              password=readcfg(['DATABASE', 'password'], 1),
-                                              database=readcfg(['DATABASE', 'database'], 1))
-                cursor = cnx.cursor()
-                query = "SELECT id FROM chat ORDER BY id ASC"
-                cursor.execute(query)
-                data = cursor.fetchall()
-                cnx.commit()
-                cursor.close()
-                cnx.close()
-                idlist = []
-                if data != "":
-                    for item in data:
-                        id = str(str(item)[1:-2]) + "\n"
-                        idlist.append(id)
-                    try:
-                        f = open("idlist.txt", "w")
-                        f.writelines(idlist)
-                        f.close()
-                    except:
-                        print("error with file")
-            except:
-                print("bdd innacessible")
-
-
 def get_msg(userinput, self):
     id = str(userinput[1])
     try:
         import mysql.connector
-        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                      port=int(readcfg(['DATABASE', 'port'], 1)),
-                                      user=readcfg(['DATABASE', 'user'], 1),
-                                      password=readcfg(['DATABASE', 'password'], 1),
-                                      database=readcfg(['DATABASE', 'database'], 1))
+        cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                      port=int(readcfg(['DATABASE', 'port'])),
+                                      user=readcfg(['DATABASE', 'user']),
+                                      password=readcfg(['DATABASE', 'password']),
+                                      database=readcfg(['DATABASE', 'database']))
         cursor = cnx.cursor()
         query = "SELECT username FROM chat WHERE id ='" + id + "'"
         cursor.execute(query)
@@ -166,11 +127,11 @@ def register(userinput, self):
     if is_email_used == False and is_login_used == False:
         try:
             import mysql.connector
-            cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                          port=int(readcfg(['DATABASE', 'port'], 1)),
-                                          user=readcfg(['DATABASE', 'user'], 1),
-                                          password=readcfg(['DATABASE', 'password'], 1),
-                                          database=readcfg(['DATABASE', 'database'], 1))
+            cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                          port=int(readcfg(['DATABASE', 'port'])),
+                                          user=readcfg(['DATABASE', 'user']),
+                                          password=readcfg(['DATABASE', 'password']),
+                                          database=readcfg(['DATABASE', 'database']))
             cursor = cnx.cursor()
             query = "INSERT INTO users (password, username, first_name, last_name, email) VALUES(" + "'" + password + "'" + ", " + "'" + username + "'" + ", " + "'" + first_name + "'" + ", " + "'" + last_name + "'" + ", " + "'" + email + "'" +")"
             cursor.execute(query)
@@ -188,11 +149,11 @@ def register(userinput, self):
 
 def check_login(login):
     import mysql.connector
-    cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                  port=int(readcfg(['DATABASE', 'port'], 1)),
-                                  user=readcfg(['DATABASE', 'user'], 1),
-                                  password=readcfg(['DATABASE', 'password'], 1),
-                                  database=readcfg(['DATABASE', 'database'], 1))
+    cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                  port=int(readcfg(['DATABASE', 'port'])),
+                                  user=readcfg(['DATABASE', 'user']),
+                                  password=readcfg(['DATABASE', 'password']),
+                                  database=readcfg(['DATABASE', 'database']))
     cursor = cnx.cursor()
     query = "SELECT username FROM users WHERE username ='" + login + "'"
     cursor.execute(query)
@@ -206,11 +167,11 @@ def check_login(login):
 
 def check_email(email):
     import mysql.connector
-    cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                  port=int(readcfg(['DATABASE', 'port'], 1)),
-                                  user=readcfg(['DATABASE', 'user'], 1),
-                                  password=readcfg(['DATABASE', 'password'], 1),
-                                  database=readcfg(['DATABASE', 'database'], 1))
+    cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                  port=int(readcfg(['DATABASE', 'port'])),
+                                  user=readcfg(['DATABASE', 'user']),
+                                  password=readcfg(['DATABASE', 'password']),
+                                  database=readcfg(['DATABASE', 'database']))
     cursor = cnx.cursor()
     query = "SELECT username FROM users WHERE email ='" + email + "'"
     cursor.execute(query)
@@ -225,11 +186,11 @@ def check_email(email):
 
 def check_password(login,password):
     import mysql.connector
-    cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host'], 1),
-                                  port=int(readcfg(['DATABASE', 'port'], 1)),
-                                  user=readcfg(['DATABASE', 'user'], 1),
-                                  password=readcfg(['DATABASE', 'password'], 1),
-                                  database=readcfg(['DATABASE', 'database'], 1))
+    cnx = mysql.connector.connect(host=readcfg(['DATABASE', 'host']),
+                                  port=int(readcfg(['DATABASE', 'port'])),
+                                  user=readcfg(['DATABASE', 'user']),
+                                  password=readcfg(['DATABASE', 'password']),
+                                  database=readcfg(['DATABASE', 'database']))
     cursor = cnx.cursor()
     query = "SELECT password FROM users WHERE username ='" + login + "'"
     cursor.execute(query)
@@ -244,59 +205,10 @@ def check_password(login,password):
         return False
 
 
-def httpserver():
-    from threading import Thread
-    import os
-    class launchhttpserver(Thread):
-        def __init__(self):
-            Thread.__init__(self)
-
-        def run(self):
-            import http.server
-            import socketserver
-            PORT = int(readcfg(['HTTP', 'port'], 0))
-            HOST = readcfg(['HTTP', 'host'], 0)
-            try:
-                os.chdir("http")
-                try:
-                    Handler = http.server.SimpleHTTPRequestHandler
-                    with socketserver.TCPServer((HOST, PORT), Handler) as httpd:
-                        print("serving at port", PORT)
-                        httpd.serve_forever()
-                except:
-                    print("error http server")
-
-            except:
-                try:
-                    os.makedirs("http")
-                    os.chdir("http")
-                    try:
-                        Handler = http.server.SimpleHTTPRequestHandler
-                        with socketserver.TCPServer((HOST, PORT), Handler) as httpd:
-                            print("serving at port", PORT)
-                            httpd.serve_forever()
-                            print("s")
-                    except:
-                        print("error http server")
-
-                except:
-                    print("error http directory")
-
-    thread_1 = launchhttpserver()
-    thread_1.start()
-
-
-def updatelist():
-    thread_refreshidlist = RefreshIdsList()
-    thread_refreshidlist.start()
-
 
 def readcfg(list, mode):
     config = configparser.ConfigParser()
-    if mode == 0:
-        config.read('server_config.ini')
-    if mode == 1:
-        config.read(os.path.join("..", "server_config.ini"))
+    config.read('server_config.ini')
     for item in list:
         config = config[item]
     return str(config)
@@ -312,10 +224,6 @@ def check_cfg():
                               'user' : '',
                               'password' : '',
                               'database': ''}
-        config['HTTP'] = {'host': 'localhost',
-                          'port': '8000'}
-        with open('server_config.ini', 'w') as configfile:
-            config.write(configfile)
     else:
         config = configparser.ConfigParser()
         config.read('server_config.ini')
@@ -330,19 +238,6 @@ def check_cfg():
                 config.write(configfile)
         if ('port' in config['SOCKET']) is False:
             config['SOCKET']['port'] = '1111'
-            with open('server_config.ini', 'w') as configfile:
-                config.write(configfile)
-        if ('HTTP' in config) is False:
-            config['HTTP'] = {'host': 'localhost',
-                              'port': '8000'}
-            with open('server_config.ini', 'w') as configfile:
-                config.write(configfile)
-        if ('host' in config['HTTP']) is False:
-            config['SOCKET']['host'] = 'localhost'
-            with open('server_config.ini', 'w') as configfile:
-                config.write(configfile)
-        if ('port' in config['HTTP']) is False:
-            config['SOCKET']['port'] = '8000'
             with open('server_config.ini', 'w') as configfile:
                 config.write(configfile)
         if ('host' in config['DATABASE']) is False:

@@ -59,10 +59,6 @@ class RefreshMessages(Thread):
             try:
                 time.sleep(1)
                 global guichat
-                # request = requests.get("http://"+ readcfg(['HTTP', 'host'])+ ":" + readcfg(['HTTP', 'port']) + "/idlist.txt")
-                # request = request.text
-                # idlist = request.split("\r\n")
-                # idlist = idlist[:-1]
                 idlist = loadidslist(username)
                 for item in idlist:
                     item = str(item)[1:-2]

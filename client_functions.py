@@ -100,10 +100,6 @@ def check_cfg():
                             'port': '1111'}
         with open('client_config.ini', 'w') as configfile:
             config.write(configfile)
-        config['HTTP'] = {'host': 'localhost',
-                          'port': '8000'}
-        with open('client_config.ini', 'w') as configfile:
-            config.write(configfile)
     else:
         config = configparser.ConfigParser()
         config.read('client_config.ini')
@@ -119,18 +115,5 @@ def check_cfg():
                 config.write(configfile)
         if ('port' in config['SOCKET']) == False:
             config['SOCKET']['port'] = '1111'
-            with open('client_config.ini', 'w') as configfile:
-                config.write(configfile)
-        if ('HTTP' in config) is False:
-            config['HTTP'] = {'host': 'localhost',
-                              'port': '8000'}
-            with open('client_config.ini', 'w') as configfile:
-                config.write(configfile)
-        if ('host' in config['HTTP']) is False:
-            config['SOCKET']['host'] = 'localhost'
-            with open('client_config.ini', 'w') as configfile:
-                config.write(configfile)
-        if ('port' in config['HTTP']) is False:
-            config['SOCKET']['port'] = '8000'
             with open('client_config.ini', 'w') as configfile:
                 config.write(configfile)
