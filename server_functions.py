@@ -205,8 +205,7 @@ def check_password(login,password):
         return False
 
 
-
-def readcfg(list, mode):
+def readcfg(list):
     config = configparser.ConfigParser()
     config.read('server_config.ini')
     for item in list:
