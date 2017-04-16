@@ -39,7 +39,7 @@ class ClientThread(threading.Thread):
 
 tcpsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 tcpsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-tcpsock.bind((readcfg(['SOCKET', 'host'], 0), int(readcfg(['SOCKET', 'port'], 0))))
+tcpsock.bind((readcfg(['SOCKET', 'host']), int(readcfg(['SOCKET', 'port']))))
 
 while True:
     tcpsock.listen(10)
